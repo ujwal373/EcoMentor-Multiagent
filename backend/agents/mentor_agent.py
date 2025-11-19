@@ -3,6 +3,7 @@ from typing import Optional
 
 from config import get_openai_client, OPENAI_MODEL
 from agents.tool_agent import calculate_emission
+from agents.memory_agent import update_session, session_summary
 
 client = None
 
@@ -35,11 +36,12 @@ def extract_numeric_value(message: str) -> Optional[float]:
         return None
 
 
-def mentor_reply(message: str) -> str:
+def mentor_reply(message: str, session_id: str = "default") -> str:
     intent = detect_intent(message)
     numeric = extract_numeric_value(message)
 
-    emission_context = ""
+    emission_context = "No numeric emission estimate available."
+    calc = None
     if intent in {"transport", "electricity", "food"} and numeric is not None:
         calc = calculate_emission(intent, numeric)
         emission_context = (
@@ -48,19 +50,31 @@ def mentor_reply(message: str) -> str:
             f"for value={numeric} in category='{intent}'."
         )
 
+    past_summary = session_summary(session_id)
+
     system_prompt = (
         "You are EcoMentor, a friendly sustainability coach. "
-        "Your job is to help users understand and reduce their carbon footprint. "
-        "Be concrete, numeric where possible, and suggest 1–3 realistic next steps. "
-        "Keep answers short, clear, and non-preachy."
+        "Help users understand and reduce their carbon footprint. "
+        "Use concrete numbers when available and suggest 1–3 realistic next steps. "
+        "Keep answers short, clear, and encouraging."
     )
 
     user_context = (
         f"User message: {message}\n\n"
         f"Detected intent: {intent}.\n"
-        f"{emission_context or 'No numeric emission estimate available.'}\n\n"
-        "Based on this, explain the impact in simple terms and give actionable suggestions."
+        f"{emission_context}\n\n"
+        f"Previous context for this user: {past_summary}\n\n"
+        "Based on this, respond personally and mention progress if relevant."
     )
+
+    # store this interaction in memory before/after LLM (here: before)
+    interaction = {
+        "intent": intent,
+        "message": message,
+        "numeric": numeric,
+        "emission_kg": calc["emission_kg"] if calc else None,
+    }
+    update_session(session_id, interaction)
 
     try:
         c = _get_client()
@@ -74,11 +88,9 @@ def mentor_reply(message: str) -> str:
             max_tokens=350,
         )
         return resp.choices[0].message.content.strip()
-    except Exception as e:
-        # Fallback so the API never fully breaks
+    except Exception:
         return (
-            "I had an issue calling the AI backend, but here’s a rough guideline: "
-            f"your situation seems related to {intent}. "
-            "Try reducing frequency, switching to a lower-carbon alternative, "
-            "and tracking your change for a week."
+            "I had an issue calling the AI backend, but I’ve stored your activity "
+            "and will use it to improve future suggestions. For now, try reducing "
+            "frequency, switching to a lower-carbon alternative, and track the change for a week."
         )
