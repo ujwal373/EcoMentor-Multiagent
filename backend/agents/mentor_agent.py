@@ -2,7 +2,8 @@ import re
 from typing import Optional
 from config import get_openai_client, OPENAI_MODEL
 from agents.tool_agent import calculate_emission
-from agents.memory_agent import update_session, session_summary
+from agents.memory_agent import update_session, session_summary, weekly_summary
+
 
 client = None
 
