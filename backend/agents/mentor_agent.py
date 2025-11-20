@@ -1,6 +1,5 @@
 import re
 from typing import Optional
-
 from config import get_openai_client, OPENAI_MODEL
 from agents.tool_agent import calculate_emission
 from agents.memory_agent import update_session, session_summary
@@ -51,6 +50,11 @@ def mentor_reply(message: str, session_id: str = "default") -> str:
         )
 
     past_summary = session_summary(session_id)
+    weekly = weekly_summary(session_id)
+    weekly_context = (
+        f"User's weekly emission total: {weekly['weekly_total_kg']} kg CO₂e. "
+        f"Category breakdown: {weekly['breakdown']}. "
+    )
 
     system_prompt = (
         "You are EcoMentor, a friendly sustainability coach. "
