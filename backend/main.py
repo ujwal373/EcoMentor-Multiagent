@@ -5,6 +5,7 @@ from agents.mentor_agent import mentor_reply
 from agents.tool_agent import calculate_emission
 from agents.observability_agent import log_event
 from agents.memory_agent import weekly_summary
+from agents.metrics_agent import get_metrics
 
 app = FastAPI(title="EcoMentor API")
 
@@ -52,3 +53,9 @@ def log_endpoint(data: LogData):
 def weekly_summary_endpoint(session_id: str = "default"):
     summary = weekly_summary(session_id)
     return {"session_id": session_id, "weekly_summary": summary}
+
+
+
+@app.get("/metrics")
+def metrics_endpoint():
+    return {"metrics": get_metrics()}
