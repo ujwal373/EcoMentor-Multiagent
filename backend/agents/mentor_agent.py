@@ -3,6 +3,8 @@ from typing import Optional
 from config import get_openai_client, OPENAI_MODEL
 from agents.tool_agent import calculate_emission
 from agents.memory_agent import update_session, session_summary, weekly_summary
+from agents.metrics_agent import log_metrics
+
 
 
 client = None
@@ -82,6 +84,13 @@ def mentor_reply(message: str, session_id: str = "default") -> str:
         "emission_kg": calc["emission_kg"] if calc else None,
     }
     update_session(session_id, interaction)
+    
+    log_metrics(
+    session_id=session_id,
+    intent=intent,
+    emission=interaction["emission_kg"]
+    )
+
 
     try:
         c = _get_client()
