@@ -1,11 +1,12 @@
 from typing import Optional
 from fastapi import FastAPI
 from pydantic import BaseModel
-from agents.mentor_agent import mentor_reply
+#from agents.mentor_agent import mentor_reply
 from agents.tool_agent import calculate_emission
 from agents.observability_agent import log_event
 from agents.memory_agent import weekly_summary
 from agents.metrics_agent import get_metrics
+from agents.orchestrator_agent import handle_message
 
 app = FastAPI(title="EcoMentor API")
 
@@ -55,7 +56,19 @@ def weekly_summary_endpoint(session_id: str = "default"):
     return {"session_id": session_id, "weekly_summary": summary}
 
 
-
 @app.get("/metrics")
 def metrics_endpoint():
     return {"metrics": get_metrics()}
+
+
+
+@app.post("/chat")
+def chat_endpoint(data: ChatQuery):
+    sid = data.session_id or "default"
+    result = handle_message(data.message, sid)
+    return {
+        "agent": "orchestrator",
+        "session_id": sid,
+        "response": result["text"],
+        "trace": result["trace"],
+    }
