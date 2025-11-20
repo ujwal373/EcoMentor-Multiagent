@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from agents.mentor_agent import mentor_reply
 from agents.tool_agent import calculate_emission
 from agents.observability_agent import log_event
+from agents.memory_agent import weekly_summary
 
 app = FastAPI(title="EcoMentor API")
 
@@ -45,3 +46,9 @@ def calc_endpoint(data: EmissionRequest):
 def log_endpoint(data: LogData):
     log_event(data.event, data.details)
     return {"status": "logged"}
+
+
+@app.get("/weekly_summary")
+def weekly_summary_endpoint(session_id: str = "default"):
+    summary = weekly_summary(session_id)
+    return {"session_id": session_id, "weekly_summary": summary}
