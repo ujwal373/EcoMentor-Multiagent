@@ -64,12 +64,14 @@ def mentor_reply(message: str, session_id: str = "default") -> str:
     )
 
     user_context = (
-        f"User message: {message}\n\n"
-        f"Detected intent: {intent}.\n"
-        f"{emission_context}\n\n"
-        f"Previous context for this user: {past_summary}\n\n"
-        "Based on this, respond personally and mention progress if relevant."
-    )
+    f"User message: {message}\n\n"
+    f"Detected intent: {intent}.\n"
+    f"{emission_context}\n\n"
+    f"Previous context: {past_summary}\n\n"
+    f"Weekly context: {weekly_context}\n\n"
+    "Give a helpful and personalized sustainability suggestion."
+)
+
 
     # store this interaction in memory before/after LLM (here: before)
     interaction = {
