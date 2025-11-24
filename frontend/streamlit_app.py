@@ -17,39 +17,87 @@ st.sidebar.write("Your personalized sustainability session.")
 st.title("🌱 EcoMentor — Your Sustainability Coach")
 
 
-# --- Chat Section ---
-st.subheader("Chat with EcoMentor")
+# ----------------------------------------------------
+# 🌱 ECO-MENTOR CHAT WIDGET (COMPACT + SCROLLABLE)
+# ----------------------------------------------------
+st.subheader("💬 Chat with EcoMentor")
 
-user_input = st.text_input("Ask something about your carbon footprint...")
-chat_button = st.button("Send")
+# CSS for chat styling
+st.markdown("""
+<style>
+.chat-window {
+    background-color: #f7f7f7;
+    border-radius: 12px;
+    height: 330px;
+    padding: 10px;
+    overflow-y: auto;
+    border: 1px solid #D0D0D0;
+}
 
+.user-msg {
+    background-color: #DCFCE7; /* Light green */
+    padding: 8px 12px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    width: fit-content;
+    max-width: 80%;
+}
+
+.bot-msg {
+    background-color: #E5E7EB; /* Light grey */
+    padding: 8px 12px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    width: fit-content;
+    max-width: 80%;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Session state to store chat history
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-if chat_button and user_input:
-    try:
-        response = requests.post(
-            f"{API_BASE}/chat",
-            json={"message": user_input, "session_id": session_id},
-            timeout=10
-        )
-        data = response.json()
-        reply = data["response"]
+# Chat display container
+chat_container = st.container()
+with chat_container:
+    st.markdown('<div class="chat-window">', unsafe_allow_html=True)
 
+    # Render stored chat history
+    for sender, msg in st.session_state.chat_history:
+        if sender == "You":
+            st.markdown(f'<div class="user-msg"><b>You:</b> {msg}</div>', unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div class="bot-msg"><b>EcoMentor:</b> {msg}</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Message input
+user_input = st.text_input("Type your message...")
+
+if st.button("Send"):
+    if user_input.strip():
+        # Save user message
         st.session_state.chat_history.append(("You", user_input))
-        st.session_state.chat_history.append(("EcoMentor", reply))
 
-    except Exception as e:
-        st.error("Error connecting to backend.")
-        st.error(str(e))
+        # Call backend
+        try:
+            response = requests.post(
+                f"{API_BASE}/chat",
+                json={"message": user_input, "session_id": session_id},
+                timeout=10
+            )
+            data = response.json()
+            reply = data.get("response", "Error: No response from EcoMentor")
 
+            # Save bot reply
+            st.session_state.chat_history.append(("EcoMentor", reply))
 
-# Display chat history
-for sender, msg in st.session_state.chat_history:
-    if sender == "You":
-        st.markdown(f"**🧑 You:** {msg}")
-    else:
-        st.markdown(f"**🤖 EcoMentor:** {msg}")
+        except Exception as e:
+            st.session_state.chat_history.append(("EcoMentor", f"Error: {str(e)}"))
+
+        st.experimental_rerun()
+
 
 
 # --- Weekly Summary ---
