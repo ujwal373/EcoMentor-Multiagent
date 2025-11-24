@@ -1,14 +1,15 @@
 {
-  "total_queries": 4,
+  "total_queries": 9,
   "category_counts": {
-    "transport": 1,
-    "electricity": 1,
-    "food": 1,
+    "transport": 4,
+    "electricity": 2,
+    "food": 2,
     "general": 1
   },
-  "total_emissions_logged": 4.52,
+  "total_emissions_logged": 18.49,
   "session_query_counts": {
-    "ujwal123": 4
+    "ujwal123": 8,
+    "new_user_101": 1
   },
   "timestamps": [
     {
@@ -34,6 +35,36 @@
       "intent": "general",
       "session_id": "ujwal123",
       "emission": null
+    },
+    {
+      "ts": "2025-11-20T17:20:24.914656",
+      "intent": "transport",
+      "session_id": "ujwal123",
+      "emission": 2.52
+    },
+    {
+      "ts": "2025-11-20T17:20:39.480525",
+      "intent": "electricity",
+      "session_id": "ujwal123",
+      "emission": 2.4
+    },
+    {
+      "ts": "2025-11-20T17:20:51.610172",
+      "intent": "food",
+      "session_id": "ujwal123",
+      "emission": 8.0
+    },
+    {
+      "ts": "2025-11-20T17:21:01.934943",
+      "intent": "transport",
+      "session_id": "ujwal123",
+      "emission": null
+    },
+    {
+      "ts": "2025-11-20T17:21:10.957136",
+      "intent": "transport",
+      "session_id": "new_user_101",
+      "emission": 1.05
     }
   ]
 }
