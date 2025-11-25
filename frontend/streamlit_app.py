@@ -1,5 +1,8 @@
 import streamlit as st
 import requests
+import plotly.express as px
+import pandas as pd
+
 
 API_BASE = "http://127.0.0.1:8000"
 
@@ -116,3 +119,87 @@ try:
 
 except:
     st.warning("Error loading metrics.")
+
+st.markdown("### 🥧 Category Distribution")
+
+try:
+    counts = metrics["category_counts"]
+    df_counts = pd.DataFrame({
+        "Category": list(counts.keys()),
+        "Count": list(counts.values())
+    })
+
+    fig_pie = px.pie(
+        df_counts,
+        names="Category",
+        values="Count",
+        color="Category",
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    st.plotly_chart(fig_pie, use_container_width=True)
+
+except Exception as e:
+    st.error(f"Failed to load pie chart: {e}")
+
+st.markdown("### 📦 Emissions by Category (kg CO₂e)")
+
+try:
+    timeline = metrics["timestamps"]
+
+    df_em = pd.DataFrame([{
+        "Category": entry["intent"],
+        "Emission": entry["emission"]
+    } for entry in timeline if entry["emission"] is not None])
+
+    if not df_em.empty:
+        fig_bar = px.bar(
+            df_em.groupby("Category").sum().reset_index(),
+            x="Category",
+            y="Emission",
+            color="Category",
+            text="Emission",
+            color_discrete_sequence=px.colors.qualitative.Safe
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+    else:
+        st.info("No emission data available yet.")
+
+except Exception as e:
+    st.error(f"Bar chart failed: {e}")
+
+st.markdown("### ⏳ Emission Timeline")
+
+try:
+    df_time = pd.DataFrame([
+        {
+            "Timestamp": entry["ts"],
+            "Emission": entry["emission"]
+        }
+        for entry in timeline if entry["emission"] is not None
+    ])
+
+    if not df_time.empty:
+        df_time["Timestamp"] = pd.to_datetime(df_time["Timestamp"])
+
+        fig_line = px.line(
+            df_time,
+            x="Timestamp",
+            y="Emission",
+            markers=True,
+            color_discrete_sequence=["#2E7D32"]  # eco green
+        )
+        st.plotly_chart(fig_line, use_container_width=True)
+    else:
+        st.info("No timestamped emission entries yet.")
+
+except Exception as e:
+    st.error(f"Line chart failed: {e}")
+
+st.markdown("### 🌟 Key Indicators")
+
+colA, colB, colC = st.columns(3)
+
+colA.metric("🌍 Total CO₂ Logged", f"{metrics['total_emissions_logged']} kg")
+colB.metric("📌 Queries Made", metrics["total_queries"])
+colC.metric("👥 Active Sessions", len(metrics["session_query_counts"]))
+
