@@ -67,3 +67,37 @@ def log_metrics(session_id: str, intent: str, emission: float | None):
 
 def get_metrics():
     return load_metrics()
+
+def calculate_sustainability_score(metrics, weekly_current, weekly_previous=0):
+    total_queries = metrics["total_queries"]
+    
+    # 1. Baseline emission score (40%)
+    weekly_em = weekly_current
+    baseline = max(0, 40 - (weekly_em * 0.8))
+
+    # 2. Improvement score (25%)
+    if weekly_previous > 0:
+        improvement = 25 * (weekly_previous - weekly_em) / max(weekly_previous, weekly_em)
+    else:
+        improvement = 12  # neutral mid-score for first week
+
+    improvement = max(0, improvement)
+
+    # 3. Category mix score (15%)
+    counts = metrics["category_counts"]
+    weights = {"electricity": 1.0, "food": 0.8, "transport": 0.5, "general": 0.7}
+
+    mix_raw = sum(counts[c] * weights.get(c, 1.0) for c in counts)
+    mix = max(0, 15 - mix_raw)
+
+    # 4. Engagement score (10%)
+    engagement = min(10, total_queries * 0.5)
+
+    # 5. Consistency score (10%)
+    distinct_days = len({ts["ts"][:10] for ts in metrics["timestamps"]})
+    consistency = min(10, distinct_days * 2)
+
+    score = baseline + improvement + mix + engagement + consistency
+    score = min(100, max(0, score))
+
+    return round(score, 2)
