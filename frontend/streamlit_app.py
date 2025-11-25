@@ -203,3 +203,23 @@ colA.metric("🌍 Total CO₂ Logged", f"{metrics['total_emissions_logged']} kg"
 colB.metric("📌 Queries Made", metrics["total_queries"])
 colC.metric("👥 Active Sessions", len(metrics["session_query_counts"]))
 
+st.markdown("### 🌿 Sustainability Score")
+
+try:
+    score = requests.get(
+        f"{API_BASE}/sustainability_score", 
+        params={"session_id": session_id}
+    ).json()["score"]
+
+    if score >= 75:
+        color = "🌟 Excellent"
+    elif score >= 50:
+        color = "💚 Good"
+    else:
+        color = "⚠️ Needs Improvement"
+
+    st.metric("Your Score", f"{score}/100", color)
+
+except Exception as e:
+    st.error(f"Score unavailable: {e}")
+
