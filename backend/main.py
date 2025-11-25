@@ -5,7 +5,7 @@ from agents.mentor_agent import mentor_reply
 from agents.tool_agent import calculate_emission
 from agents.observability_agent import log_event
 from agents.memory_agent import weekly_summary
-from agents.metrics_agent import get_metrics
+from agents.metrics_agent import get_metrics, calculate_sustainability_score
 from agents.orchestrator_agent import handle_message
 
 app = FastAPI(title="EcoMentor API")
@@ -72,3 +72,10 @@ def chat_endpoint(data: ChatQuery):
         "response": result["text"],
         "trace": result["trace"],
     }
+
+@app.get("/sustainability_score")
+def sustainability_endpoint(session_id: str = "default"):
+    metrics = get_metrics()
+    weekly = weekly_summary(session_id)
+    score = calculate_sustainability_score(metrics, weekly["weekly_total_kg"])
+    return {"session_id": session_id, "score": score}
