@@ -1,5 +1,6 @@
 from typing import Dict, Any, List
 from datetime import datetime, timedelta
+from agents.intent_agent import POSITIVE_PATTERNS, NEGATIVE_PATTERNS
 
 _MEMORY: Dict[str, Dict[str, Any]] = {}
 
@@ -8,6 +9,8 @@ def get_session(session_id: str) -> Dict[str, Any]:
     if session_id not in _MEMORY:
         _MEMORY[session_id] = {
             "history": [],
+            "positive_actions": [],
+            "negative_actions": [],
             "emission_log": [],       # list of { timestamp, category, emission }
             "category_totals": {      # sum of emissions per category
                 "transport": 0.0,
@@ -36,6 +39,12 @@ def update_session(session_id: str, interaction: Dict[str, Any]) -> None:
         cat = interaction.get("intent")
         if cat in session["category_totals"]:
             session["category_totals"][cat] += interaction["emission_kg"]
+
+    # store positive and negative actions
+    if interaction.get("intent") in POSITIVE_PATTERNS:
+        session["positive_actions"].append(interaction)
+    elif interaction.get("intent") in NEGATIVE_PATTERNS:
+        session["negative_actions"].append(interaction)
 
 
 def session_summary(session_id: str) -> str:
