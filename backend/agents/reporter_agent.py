@@ -9,18 +9,16 @@ def _get_client():
         _client = get_openai_client()
     return _client
 
-score = ctx.get("sustainability_score", 50)
-
-if score >= 75:
-    sis_reaction = "🌟 Excellent sustainability levels! You're making a strong positive impact."
-elif score >= 50:
-    sis_reaction = "💚 Good progress! You're improving steadily — keep going."
-else:
-    sis_reaction = "⚠️ You're on the right path — small consistent changes will boost your score."
-
 
 
 def build_response(ctx: dict) -> str:
+    score = ctx.get("sustainability_score", 50)
+    if score >= 75:
+        sis_reaction = "🌟 Excellent sustainability levels! You're making a strong positive impact."
+    elif score >= 25:
+        sis_reaction = "💚 Good progress! You're improving steadily — keep going."
+    else:
+        sis_reaction = "⚠️ You're on the right path — small consistent changes will boost your score."
     system_prompt = (
         "You are EcoMentor, a sustainability coach. "
         "Use the structured context to explain the user's impact and give "
