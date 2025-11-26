@@ -1,10 +1,16 @@
 from agents.intent_agent import detect_intent, extract_numeric_value
 from agents.tool_agent import calculate_emission
 from agents.memory_agent import update_session, session_summary, weekly_summary
-from agents.metrics_agent import log_metrics
+from agents.metrics_agent import log_metrics, get_metrics
 from agents.reporter_agent import build_response
+from agents.metrics_agent import calculate_sustainability_score
 
 def handle_message(message: str, session_id: str = "default") -> dict:
+    # SIS score
+    metrics = get_metrics()
+    weekly = weekly_summary(session_id)
+    score = calculate_sustainability_score(metrics, weekly["weekly_total_kg"])
+
     # 1) Intent + value
     intent = detect_intent(message)
     numeric = extract_numeric_value(message)
@@ -41,6 +47,7 @@ def handle_message(message: str, session_id: str = "default") -> dict:
         "session_summary_text": sess_summary,
         "weekly_summary": weekly,
         "metrics": metrics,
+        "sustainability_score": score,
     }
     text = build_response(context)
 
