@@ -15,7 +15,9 @@ DEFAULT_METRICS = {
     },
     "total_emissions_logged": 0.0,
     "session_query_counts": {},
-    "timestamps": []  # for tracing
+    "timestamps": [],  # for tracing,
+    "positive_actions": [],
+    "negative_actions": []
 }
 
 def load_metrics():
@@ -35,6 +37,25 @@ def save_metrics(metrics):
 
 def log_metrics(session_id: str, intent: str, emission: float | None):
     metrics = load_metrics()
+    # Ensure positive actions exist
+    metrics.setdefault("positive_actions", [])
+    # Ensure negative actions exist
+    metrics.setdefault("negative_actions", [])
+    # Positive action logging
+    if intent in POSITIVE_POINTS:
+        metrics["positive_actions"].append({
+            "timestamp": datetime.utcnow(),
+            "action": intent,
+            "points": POSITIVE_POINTS[intent]
+        })
+
+    # Negative action logging
+    if intent in NEGATIVE_POINTS:
+        metrics["negative_actions"].append({
+            "timestamp": datetime.utcnow(),
+            "action": intent,
+            "points": NEGATIVE_POINTS[intent]
+        })
 
     # Total queries
     metrics["total_queries"] += 1
@@ -99,5 +120,15 @@ def calculate_sustainability_score(metrics, weekly_current, weekly_previous=0):
 
     score = baseline + improvement + mix + engagement + consistency
     score = min(100, max(0, score))
+
+    # Positive action bonus (maximum +20)
+    positive_actions = metrics.get("positive_actions", [])
+    positive_boost = min(20, sum(a["points"] for a in positive_actions))
+    score += positive_boost
+
+    # Negative action penalty (maximum -10)
+    negative_actions = metrics.get("negative_actions", [])
+    negative_penalty = min(10, sum(a["points"] for a in negative_actions))
+    score -= negative_penalty
 
     return round(score, 2)

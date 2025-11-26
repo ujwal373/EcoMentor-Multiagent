@@ -76,7 +76,6 @@ if intent in NEGATIVE_POINTS:
         "points": NEGATIVE_POINTS[intent]
     })
 
-
 def session_summary(session_id: str) -> str:
     session = get_session(session_id)
     history = session["history"]
