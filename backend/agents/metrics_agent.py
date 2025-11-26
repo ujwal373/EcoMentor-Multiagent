@@ -37,27 +37,16 @@ def save_metrics(metrics):
 
 def log_metrics(session_id: str, intent: str, emission: float | None):
     metrics = load_metrics()
-    # Ensure positive actions exist
+
+    # Ensure keys exist
     metrics.setdefault("positive_actions", [])
-    # Ensure negative actions exist
     metrics.setdefault("negative_actions", [])
-    # Positive action logging
-    if intent in POSITIVE_POINTS:
-        metrics["positive_actions"].append({
-            "timestamp": datetime.utcnow(),
-            "action": intent,
-            "points": POSITIVE_POINTS[intent]
-        })
+    metrics.setdefault("total_queries", 0)
+    metrics.setdefault("total_emissions_logged", 0)
+    metrics.setdefault("session_query_counts", {})
+    metrics.setdefault("timestamps", [])
 
-    # Negative action logging
-    if intent in NEGATIVE_POINTS:
-        metrics["negative_actions"].append({
-            "timestamp": datetime.utcnow(),
-            "action": intent,
-            "points": NEGATIVE_POINTS[intent]
-        })
-
-    # Total queries
+    # Increment total queries
     metrics["total_queries"] += 1
 
     # Category counts
@@ -84,7 +73,6 @@ def log_metrics(session_id: str, intent: str, emission: float | None):
 
     save_metrics(metrics)
     return metrics
-
 
 def get_metrics():
     return load_metrics()
