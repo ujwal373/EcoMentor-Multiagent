@@ -1,7 +1,5 @@
 from typing import Dict, Any, List
 from datetime import datetime, timedelta
-from agents.intent_agent import POSITIVE_PATTERNS, NEGATIVE_PATTERNS
-from agents.metrics_agent import POSITIVE_POINTS, NEGATIVE_POINTS
 
 _MEMORY: Dict[str, Dict[str, Any]] = {}
 
