@@ -1,6 +1,7 @@
 from typing import Dict, Any, List
 from datetime import datetime, timedelta
 from agents.intent_agent import POSITIVE_PATTERNS, NEGATIVE_PATTERNS
+from agents.metrics_agent import POSITIVE_POINTS, NEGATIVE_POINTS
 
 _MEMORY: Dict[str, Dict[str, Any]] = {}
 
@@ -40,41 +41,41 @@ def update_session(session_id: str, interaction: Dict[str, Any]) -> None:
         if cat in session["category_totals"]:
             session["category_totals"][cat] += interaction["emission_kg"]
 
-# --- Positive Action Logging ---
-POSITIVE_POINTS = {
-    "tree_planting": 5,
-    "positive_transport": 2,
-    "public_transport": 1,
-    "energy_reduction": 3,
-    "renewable_energy": 10,
-    "waste_reduction": 3,
-    "local_food_choice": 2
-}
+    # --- Positive Action Logging ---
+    POSITIVE_POINTS = {
+        "tree_planting": 5,
+        "positive_transport": 2,
+        "public_transport": 1,
+        "energy_reduction": 3,
+        "renewable_energy": 10,
+        "waste_reduction": 3,
+        "local_food_choice": 2
+    }
 
-intent = interaction.get("intent")
-if intent in POSITIVE_POINTS:
-    session["positive_actions"].append({
-        "timestamp": datetime.utcnow(),
-        "action": intent,
-        "points": POSITIVE_POINTS[intent]
-    })
+    intent = interaction.get("intent")
+    if intent in POSITIVE_POINTS:
+        session["positive_actions"].append({
+            "timestamp": datetime.utcnow(),
+            "action": intent,
+            "points": POSITIVE_POINTS[intent]
+        })
 
-# --- Negative Action Logging ---
-NEGATIVE_POINTS = {
-    "negative_transport": -2,
-    "negative_energy": -1,
-    "negative_food": -1,
-    "negative_waste": -1,
-    "negative_local": -1
-}
+    # --- Negative Action Logging ---
+    NEGATIVE_POINTS = {
+        "negative_transport": -2,
+        "negative_energy": -1,
+        "negative_food": -1,
+        "negative_waste": -1,
+        "negative_local": -1
+    }
 
-intent = interaction.get("intent")
-if intent in NEGATIVE_POINTS:
-    session["negative_actions"].append({
-        "timestamp": datetime.utcnow(),
-        "action": intent,
-        "points": NEGATIVE_POINTS[intent]
-    })
+    if intent in NEGATIVE_POINTS:
+        session["negative_actions"].append({
+            "timestamp": datetime.utcnow(),
+            "action": intent,
+            "points": NEGATIVE_POINTS[intent]
+        })
+
 
 def session_summary(session_id: str) -> str:
     session = get_session(session_id)
