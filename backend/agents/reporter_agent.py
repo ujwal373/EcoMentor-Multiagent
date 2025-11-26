@@ -1,4 +1,5 @@
 from config import get_openai_client, OPENAI_MODEL
+from agents.metrics_agent import calculate_sustainability_score
 
 _client = None
 
@@ -47,14 +48,16 @@ def build_response(ctx: dict) -> str:
     )
 
     user_context = (
-        f"User message: {ctx['message']}\n"
-        f"Detected intent: {ctx['intent']}, numeric_value={ctx['numeric']}.\n"
-        f"{emission_line}\n\n"
-        f"Session summary: {ctx.get('session_summary_text')}\n"
-        f"Weekly summary: {weekly_line}\n"
-        f"System metrics snapshot: {metrics_line}\n\n"
-        "Now respond directly to the user in a friendly tone."
+    f"User message: {ctx['message']}\n\n"
+    f"SIS Score Reaction: {sis_reaction}\n"
+    f"Detected intent: {ctx['intent']}, numeric_value={ctx['numeric']}.\n"
+    f"{emission_line}\n\n"
+    f"Session summary: {ctx.get('session_summary_text')}\n"
+    f"Weekly summary: {weekly_line}\n"
+    f"System metrics snapshot: {metrics_line}\n"
+    "Now respond directly to the user with positivity and personalized guidance."
     )
+
 
     try:
         c = _get_client()
