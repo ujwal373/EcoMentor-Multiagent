@@ -101,6 +101,7 @@ EcoMentor/
 ├── .env                            # Environment variables (ignored in git)
 ├── .gitignore
 ├── LICENSE
+├── requirements.txt
 └── README.md
 
 ```
