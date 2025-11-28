@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+streamlit
+openai>=1.0.0
+python-dotenv
+pydantic
+requests
+numpy
+pandas
+matplotlib
+tqdm
